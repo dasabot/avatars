@@ -1,0 +1,15 @@
+.button {
+    width: 240px;
+    height: 240px;
+    border: 4px solid #5e217a;
+    border-radius: 16px;
+    background-color: white;
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon {
+    fill: #5E217A;
+}
