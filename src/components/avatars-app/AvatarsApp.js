@@ -129,61 +129,53 @@ const MOCK_DATA = [
   },
 ]
 
-
-let avatarsArray = [];
 let newAvatars = [];
 
 function AvatarsApp() {
 
   const [countAvatar, setCountAvatar] = useState(0);
-
+  let [renderAvatars, setRenderAvatars] = useState([])
 
   async function getAvatars() {
-    await axios.get('https://tinyfac.es/api/data?limit=50&quality=0').then((response) => {
-      newAvatars = response.data;
-    })
-    console.log("getAvatars working")
+    let response = await axios.get('https://tinyfac.es/api/data?limit=50&quality=0')
+    return response.data
   }
-
-
-  console.log("length:", newAvatars.length);
 
   async function addAvatar(count) {
-    if (newAvatars.length) {
-      avatarsArray.push(newAvatars[count]);
-      console.log("addAvatar counter:", count);
+    if (newAvatars.length > count) {
+      setRenderAvatars(renderAvatars.concat(newAvatars[count]));
     } else {
-      // console.log("avatars over");
-      let b = await console.log('else addAvatar');
-      let a = await getAvatars();
-      let d = await console.log('newAvatars:', newAvatars);
-      let c = await avatarsArray.push(newAvatars[count]);
-      let i = await console.log('avatarsArray:', avatarsArray);
-      render()
-      // avatarsArray.push(newAvatars[count]);
+      newAvatars = newAvatars.concat(await getAvatars());
+      setRenderAvatars(renderAvatars.concat(newAvatars[count]));
     }
   }
 
-  function changeAvatar(e) {
-    if (newAvatars.length) {
+  async function changeAvatar(e) {
+    if (newAvatars.length > countAvatar) {
       setCountAvatar(countAvatar + 1);
       e.currentTarget?.childNodes[1]?.setAttribute("src", `${newAvatars[countAvatar].url}`)
+  
     } else {
-      getAvatars();
-      // setCountAvatar(countAvatar + 1);
-      // e.currentTarget?.childNodes[1]?.setAttribute("src", `${newAvatars[countAvatar].url}`)
+      newAvatars = newAvatars.concat(await getAvatars());
+      setCountAvatar(countAvatar + 1);
+      e.currentTarget?.childNodes[1]?.setAttribute("src", `${newAvatars[countAvatar].url}`)
     }
+  }
+
+   async function refresh() {
+    newAvatars = []; //очищуємо масив з getAvatars
+    newAvatars = newAvatars.concat(await getAvatars()); //оновлюємо масив з getAvatars
+    let splicedAvatars = newAvatars.splice(0, renderAvatars.length); //вирізаєм з нового масиву аватарок (getAvatars) з 0 по renderAvatars.length
+    renderAvatars = []; // онуляєм масив аватарок котрі на екрані
+    setRenderAvatars(renderAvatars.concat(splicedAvatars)); // додаємо в чистий масив з аватарками на екрані нові аватарки які ми вирізали з нового масиву
   }
 
   return (
     <div className={styles.container} >
-      {avatarsArray.map(a => <Avatar key={a.id} onClickFunction={changeAvatar} avatarUrl={a.url} avatarId={a.id}></Avatar>)}
+      {renderAvatars.map(a => <Avatar key={a.id} onClickFunction={changeAvatar} avatarUrl={a.url} avatarId={a.id}></Avatar>)}
       <AddAvatarBtn onClickFunction={() => { setCountAvatar(countAvatar + 1); addAvatar(countAvatar) }}></AddAvatarBtn>
-      <Button buttonText={'refresh all'}></Button>
-
-      <button onClick={getAvatars}>get Avatars</button>
+      <Button onClick={refresh} buttonText={'refresh all'}></Button>
     </div>
-
   );
 }
 
