@@ -2,20 +2,23 @@ import React from 'react';
 import axios from 'axios';
 import { useState } from "react";
 import AddAvatarBtn from '../add-avatar-btn/AddAvatarBtn';
-import Avatar from '../avatar/Avatar';
 import Button from '../button/button';
 import Modal from '../modal/modal';
+import Avatar from '../avatar/Avatar';
 import styles from './styles.module.css';
 import { ModalContext } from '../../contexts/ModalContext';
+import { AvatarContext } from '../../contexts/AvatarContext';
+
 
 let newAvatars = [];
 let avatarsUsed = 0;
 
 function AvatarsApp() {
 
-  const [renderAvatars, setRenderAvatars] = useState([])
+  const [renderAvatars, setRenderAvatars] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [modalMessage, setModalMessage] = useState('hi there 👋🏻')
+  const [modalMessage, setModalMessage] = useState('hi there 👋🏻');
+  const [avatarState, setAvatarState] = useState();
 
   async function getAvatars() {
     let response = await axios.get('https://tinyfac.es/api/data?limit=50&quality=0')
@@ -68,9 +71,13 @@ function AvatarsApp() {
   return (
     <>
       <div className={styles.container} >
-        {renderAvatars.map(a => <Avatar key={a.id} onClickFunction={changeAvatar} avatarUrl={a.url} avatarId={a.id}></Avatar>)}
-        <AddAvatarBtn onClickFunction={addAvatar}></AddAvatarBtn>
-          <Button onClick={refresh} buttonText={'refresh all'} extraClass={styles.fixed}></Button>
+        <AvatarContext.Provider value={{ avatarState, setAvatarState }} >
+          {renderAvatars.map(a =>
+            <Avatar key={a.id} onClickFunction={changeAvatar} avatarUrl={a.url} avatarId={a.id}></Avatar>
+          )}
+          <AddAvatarBtn onClickFunction={addAvatar}></AddAvatarBtn>
+        </AvatarContext.Provider>
+        <Button onClick={refresh} buttonText={'refresh all'} extraClass={styles.fixed}></Button>
       </div>
       <ModalContext.Provider value={{ showModal, setShowModal }}>
         <Modal>{modalMessage}</Modal>

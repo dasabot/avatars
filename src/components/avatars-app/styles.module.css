@@ -13,3 +13,9 @@
     margin: 0 auto;
     right: 0;
 }
+
+.load {
+    width: 100px;
+    height: 100px;
+    background-color: red;
+}
