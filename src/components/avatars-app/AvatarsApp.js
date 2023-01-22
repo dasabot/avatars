@@ -18,7 +18,7 @@ function AvatarsApp() {
   const [renderAvatars, setRenderAvatars] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState('hi there 👋🏻');
-  const [avatarState, setAvatarState] = useState();
+  const [avatarState, setAvatarState] = useState(false);
 
   async function getAvatars() {
     let response = await axios.get('https://tinyfac.es/api/data?limit=50&quality=0')
@@ -41,6 +41,7 @@ function AvatarsApp() {
   async function addAvatar() {
     try {
       setRenderAvatars(renderAvatars.concat(await getNewAvatars()));
+      setAvatarState(true);
       // throw new Error("Something's gone wrong with adding the new tile");
     }
     catch (error) {
@@ -75,9 +76,9 @@ function AvatarsApp() {
           {renderAvatars.map(a =>
             <Avatar key={a.id} onClickFunction={changeAvatar} avatarUrl={a.url} avatarId={a.id}></Avatar>
           )}
-          <AddAvatarBtn onClickFunction={addAvatar}></AddAvatarBtn>
+          <AddAvatarBtn disabled={avatarState} onClickFunction={addAvatar}></AddAvatarBtn>
         </AvatarContext.Provider>
-        <Button onClick={refresh} buttonText={'refresh all'} extraClass={styles.fixed}></Button>
+        <Button onClick={refresh} buttonText={`refresh all${renderAvatars.length <= 0 ? '' : ` (${renderAvatars.length})`}`} extraClass={styles.fixed}></Button>
       </div>
       <ModalContext.Provider value={{ showModal, setShowModal }}>
         <Modal>{modalMessage}</Modal>

@@ -10,6 +10,10 @@
     justify-content: center;
 }
 
+.button:disabled {
+    visibility: hidden;
+}
+
 .icon {
     fill: #5E217A;
 }
