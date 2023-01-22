@@ -8,6 +8,7 @@ import Avatar from '../avatar/Avatar';
 import styles from './styles.module.css';
 import { ModalContext } from '../../contexts/ModalContext';
 import { AvatarContext } from '../../contexts/AvatarContext';
+import { ErrorBoundary } from 'react-error-boundary'
 
 
 let newAvatars = [];
@@ -39,26 +40,14 @@ function AvatarsApp() {
   }
 
   async function addAvatar() {
-    try {
-      setRenderAvatars(renderAvatars.concat(await getNewAvatars()));
-      setAvatarState(true);
-      // throw new Error("Something's gone wrong with adding the new tile");
-    }
-    catch (error) {
-      setShowModal(!showModal);
-      setModalMessage(`REQUEST for adding a new tile was failed: ${error.message}`);
-    }
+    setRenderAvatars(renderAvatars.concat(await getNewAvatars()));
+    setAvatarState(true);
+    // throw new Error("Something's gone wrong with adding the new tile");
   }
 
   async function changeAvatar(e) {
-    try {
-      e.currentTarget?.childNodes[1]?.setAttribute("src", `${(await getNewAvatars())[0].url}`);
-      // throw new Error("Something's gone wrong with changing the tile");
-    }
-    catch (error) {
-      setShowModal(!showModal);
-      setModalMessage(`REQUEST for Updating the tile was failed: ${error.message}`);
-    }
+    e.currentTarget?.childNodes[1]?.setAttribute("src", `${(await getNewAvatars())[0].url}`);
+    // throw new Error("Something's gone wrong with changing the tile");
   }
 
   async function refresh() {
@@ -69,14 +58,32 @@ function AvatarsApp() {
     setRenderAvatars(await getNewAvatars(renderAvatars.length));
   }
 
+  function AddAvatarErrorFallback({ error, resetErrorBoundary }) {
+    setShowModal(!showModal);
+    setModalMessage(`REQUEST for adding a new tile was failed: ${error.message}`);
+  }
+
+  function ChangeAvatarErrorFallback({ error, resetErrorBoundary }) {
+    setShowModal(!showModal);
+    setModalMessage(`REQUEST for updating the tile was failed: ${error.message}`);
+  }
+
   return (
     <>
       <div className={styles.container} >
         <AvatarContext.Provider value={{ avatarState, setAvatarState }} >
-          {renderAvatars.map(a =>
-            <Avatar key={a.id} onClickFunction={changeAvatar} avatarUrl={a.url} avatarId={a.id}></Avatar>
-          )}
-          <AddAvatarBtn disabled={avatarState} onClickFunction={addAvatar}></AddAvatarBtn>
+          <ErrorBoundary
+            FallbackComponent={ChangeAvatarErrorFallback}
+          >
+            {renderAvatars.map(a =>
+              <Avatar key={a.id} onClickFunction={changeAvatar} avatarUrl={a.url} avatarId={a.id}></Avatar>
+            )}
+          </ErrorBoundary>
+          <ErrorBoundary
+            FallbackComponent={AddAvatarErrorFallback}
+          >
+            <AddAvatarBtn disabled={avatarState} onClickFunction={addAvatar}></AddAvatarBtn>
+          </ErrorBoundary>
         </AvatarContext.Provider>
         <Button onClick={refresh} buttonText={`refresh all${renderAvatars.length <= 0 ? '' : ` (${renderAvatars.length})`}`} extraClass={styles.fixed}></Button>
       </div>
