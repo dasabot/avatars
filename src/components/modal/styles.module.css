@@ -45,3 +45,10 @@
     display: none;
     opacity: 0;
 }
+
+@media screen and (max-width: 480px) {
+    .modal {
+      padding: 10px 30px;
+      max-width: 420px;
+    }
+  }
